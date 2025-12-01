@@ -1,0 +1,19 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+  // Ważne dla Dockera na Linuxie (Alpine) + Twojego Windowsa
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Przykładowy model, żeby generowanie miało sens
+model User {
+  id    Int     @id @default(autoincrement())
+  email String  @unique
+  name  String?
+}
