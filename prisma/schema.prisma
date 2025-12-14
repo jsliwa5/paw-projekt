@@ -1,8 +1,5 @@
-// prisma/schema.prisma
-
 generator client {
   provider = "prisma-client-js"
-  // Ważne dla Dockera na Linuxie (Alpine) + Twojego Windowsa
   binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
@@ -11,9 +8,56 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Przykładowy model, żeby generowanie miało sens
+// --- MODEL UŻYTKOWNIKA ---
 model User {
-  id    Int     @id @default(autoincrement())
-  email String  @unique
-  name  String?
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String   // Pamiętaj, żeby zahashować (bcrypt/argon2)
+  name      String?  
+  
+  // Relacja: User może mieć przypisane wiele zadań
+  tasks     Task[]
+  
+  // Opcjonalnie: User może być właścicielem wielu projektów
+  projects  Project[] 
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// --- MODEL PROJEKTU ---
+model Project {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+
+  // Relacja: Projekt ma wiele zadań (One-to-Many)
+  tasks       Task[]
+
+  // Opcjonalnie: Projekt ma właściciela (Usera)
+  owner       User     @relation(fields: [ownerId], references: [id])
+  ownerId     Int
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// --- MODEL ZADANIA ---
+model Task {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  status      String   @default("TODO") // W SQLite Enums są emulowane, bezpieczniej użyć String lub zarządzać tym w kodzie
+
+  // Relacja: Task należy do Projektu (obowiązkowe)
+  // onDelete: Cascade sprawi, że jak usuniesz projekt, znikną jego zadania
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId   Int
+
+  // Relacja: Task jest przypisany do Usera (opcjonalne - zadanie może wisieć "wolne")
+  assignedTo  User?    @relation(fields: [userId], references: [id])
+  userId      Int?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }

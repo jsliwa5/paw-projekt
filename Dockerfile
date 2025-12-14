@@ -3,6 +3,8 @@ FROM node:20-alpine
 # Ustawiamy katalog roboczy
 WORKDIR /usr/src/app
 
+RUN apk add --no-cache openssl libc6-compat
+
 # Kopiujemy pliki zależności
 COPY package*.json ./
 
