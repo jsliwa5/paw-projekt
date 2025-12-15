@@ -15,10 +15,22 @@ import { AuthService } from './auth.service';
 export class AuthController {
   constructor(private authService: AuthService) {}
 
+  // Endpoint logowania
   @HttpCode(HttpStatus.OK)
   @Post('login')
   signIn(@Body() signInDto: Record<string, any>) {
-    return this.authService.signIn(signInDto.username, signInDto.password);
+    // Zmieniamy username na email zgodnie z bazą danych
+    return this.authService.signIn(signInDto.email, signInDto.password);
+  }
+
+  // Endpoint rejestracji (NOWY)
+  @Post('register')
+  signUp(@Body() signUpDto: Record<string, any>) {
+    return this.authService.signUp(
+      signUpDto.email, 
+      signUpDto.password, 
+      signUpDto.name
+    );
   }
 
   @UseGuards(AuthGuard)

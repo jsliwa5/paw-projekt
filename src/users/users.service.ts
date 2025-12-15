@@ -1,31 +1,22 @@
 import { Injectable } from '@nestjs/common';
-
-// 1. Definiujemy, jak wygląda nasz zmockowany User
-// Musimy dodać 'export', bo będziesz tego typu używał w AuthService
-export type User = {
-  userId: number;
-  username: string;
-  password: string;
-};
+import { PrismaService } from '../prisma.service';
+import { User, Prisma } from '@prisma/client';
 
 @Injectable()
 export class UsersService {
-  // 2. Tutaj używamy typu User[]
-  private readonly users: User[] = [
-    {
-      userId: 1,
-      username: 'john',
-      password: 'changeme',
-    },
-    {
-      userId: 2,
-      username: 'maria',
-      password: 'guess',
-    },
-  ];
+  constructor(private prisma: PrismaService) {}
 
-  // 3. Teraz TypeScript wie, co to jest 'User'
-  async findOne(username: string): Promise<User | undefined> {
-    return this.users.find(user => user.username === username);
+  // Szukamy po emailu, bo tak masz w schema.prisma (@unique)
+  async findOne(email: string): Promise<User | null> {
+    return this.prisma.user.findUnique({
+      where: { email },
+    });
+  }
+
+  // Metoda do tworzenia użytkownika (Rejestracja)
+  async create(data: Prisma.UserCreateInput): Promise<User> {
+    return this.prisma.user.create({
+      data,
+    });
   }
 }
