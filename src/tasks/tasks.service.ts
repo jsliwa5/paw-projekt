@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { PrismaService } from '../prisma.service';
 
@@ -13,7 +13,7 @@ export class TasksService {
         title: createTaskDto.title,
         description: createTaskDto.description,
         projectId: createTaskDto.projectId,
-        userId: createTaskDto.userId || null, // Może być null
+        userId: createTaskDto.userId || null, 
         status: 'TODO',
       },
     });
@@ -38,9 +38,23 @@ export class TasksService {
   }
 
   updateStatus(taskId: number, status: string) {
+
+    const validStatuses = Object.values(TaskStatuses) as string[];
+
+    if (!validStatuses.includes(status)){
+      throw new BadRequestException(`Status not allowed! Possible statuses: ${validStatuses.join(', ')}`);
+    }
+
     return this.prisma.task.update({
       where: { id: taskId },
       data: { status },
     });
   }
+}
+
+enum TaskStatuses {
+  TODO,
+  IN_PROGRESS,
+  PAUSED,
+  FINISHED,
 }

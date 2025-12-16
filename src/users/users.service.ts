@@ -20,7 +20,7 @@ export class UsersService {
 
   findAll() {
     return this.prisma.user.findMany({
-      select: { id: true, email: true, name: true } // Nie zwracaj hasła!
+      select: { id: true, email: true, name: true } 
     });
   }
 }
