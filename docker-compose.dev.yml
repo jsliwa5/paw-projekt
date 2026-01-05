@@ -1,41 +1,53 @@
 version: '3.8'
 
 services:
-  app:
-    container_name: nest-api-dev
-    build:
-      context: .
-      dockerfile: Dockerfile
-    command: npm run start:dev
-    ports:
-      - "3000:3000"
-    volumes:
-      - .:/usr/src/app
-      - /usr/src/app/node_modules
-    environment:
-      - DATABASE_URL=postgresql://myuser:mypassword@postgres:5432/mydb?schema=public
-      - CHOKIDAR_USEPOLLING=true
-    networks:
-      - nest-network
-    depends_on:
-      - postgres 
-
   postgres:
-    container_name: nest-postgres
     image: postgres:15-alpine
     environment:
       POSTGRES_USER: myuser
       POSTGRES_PASSWORD: mypassword
       POSTGRES_DB: mydb
     ports:
-      - "5432:5432" 
+      - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data 
+      - postgres_data:/var/lib/postgresql/data
     networks:
-      - nest-network
+      - app-network
+
+  backend:
+    build:
+      context: ./backend      
+      dockerfile: Dockerfile
+    command: npm run start:dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./backend:/usr/src/app            
+      - /usr/src/app/node_modules
+    environment:
+      - DATABASE_URL=postgresql://myuser:mypassword@postgres:5432/mydb?schema=public
+      - CHOKIDAR_USEPOLLING=true
+    depends_on:
+      - postgres
+    networks:
+      - app-network
+
+  frontend:
+    build:
+      context: ./frontend     
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app       
+      - /app/node_modules
+    environment:
+      - VITE_API_URL=http://localhost:3000
+    networks:
+      - app-network
 
 networks:
-  nest-network:
+  app-network:
 
 volumes:
-  postgres_data: 
+  postgres_data:
