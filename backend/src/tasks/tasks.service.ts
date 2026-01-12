@@ -30,7 +30,17 @@ export class TasksService {
     });
   }
 
-  assignUser(taskId: number, userId: number) {
+  async assignUser(taskId: number, userId: number) {
+    
+    const task = await this.prisma.task.findUnique({
+      where: { id: taskId },
+    });
+
+    // Jeśli nie ma zadania -> rzuć 404
+    if (!task) {
+      throw new NotFoundException(`Task with ID ${taskId} not found`);
+    }
+
     return this.prisma.task.update({
       where: { id: taskId },
       data: { userId },
