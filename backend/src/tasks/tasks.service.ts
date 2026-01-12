@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException} from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { PrismaService } from '../prisma.service';
 
@@ -6,26 +6,37 @@ import { PrismaService } from '../prisma.service';
 export class TasksService {
   constructor(private prisma: PrismaService) {}
 
+  private readonly taskSelect = {
+    id: true,
+    title: true,
+    description: true,
+    status: true,
+    priority: true,
+    dueDate: true,
+    projectId: true,
+    userId: true,
+  };
 
   async create(createTaskDto: CreateTaskDto) {
-
     const proj = await this.prisma.project.findUnique({
       where: { id: createTaskDto.projectId },
     });
 
     if (!proj) {
-      throw new NotFoundException(`Task with ID ${createTaskDto.projectId} not found`);
+      throw new NotFoundException(`Project with ID ${createTaskDto.projectId} not found`);
     }
-
 
     return this.prisma.task.create({
       data: {
         title: createTaskDto.title,
         description: createTaskDto.description,
         projectId: createTaskDto.projectId,
-        userId: createTaskDto.userId || null, 
+        userId: createTaskDto.userId || null,
         status: 'TODO',
+        priority: createTaskDto.priority,
+        dueDate: createTaskDto.dueDate,
       },
+      select: this.taskSelect,
     });
   }
 
@@ -36,7 +47,7 @@ export class TasksService {
 
     return this.prisma.task.findMany({
       where,
-      include: { assignedTo: true },
+      select: this.taskSelect,
     });
   }
 
@@ -60,11 +71,11 @@ export class TasksService {
     return this.prisma.task.update({
       where: { id: taskId },
       data: { userId },
+      select: this.taskSelect,
     });
   }
 
   async updateStatus(taskId: number, status: string) {
-
     const task = await this.prisma.task.findUnique({
       where: { id: taskId },
     });
@@ -75,20 +86,21 @@ export class TasksService {
 
     const validStatuses = Object.values(TaskStatuses) as string[];
 
-    if (!validStatuses.includes(status)){
+    if (!validStatuses.includes(status)) {
       throw new BadRequestException(`Status not allowed! Possible statuses: ${validStatuses.join(', ')}`);
     }
 
     return this.prisma.task.update({
       where: { id: taskId },
       data: { status },
+      select: this.taskSelect,
     });
   }
 }
 
 enum TaskStatuses {
-  TODO,
-  IN_PROGRESS,
-  PAUSED,
-  FINISHED,
+  TODO = 'TODO',
+  IN_PROGRESS = 'IN_PROGRESS',
+  PAUSED = 'PAUSED',
+  FINISHED = 'FINISHED',
 }

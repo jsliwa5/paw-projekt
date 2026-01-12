@@ -16,11 +16,11 @@ export class ProjectsService {
     });
   }
 
-  // Pobranie wszystkich projektów (można dodać include: { owner: true })
+  
   findAll() {
     return this.prisma.project.findMany({
       include: {
-        tasks: true, // Opcjonalnie: od razu pobierz zadania
+        tasks: true, 
       },
     });
   }

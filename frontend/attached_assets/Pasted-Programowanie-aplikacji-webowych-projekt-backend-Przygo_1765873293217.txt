@@ -1,0 +1,249 @@
+Programowanie aplikacji webowych - projekt (backend)
+Przygotował: Jakub Śliwa 177164 L4 (wraz z Konrad Krupa 177111)
+
+
+
+
+Opis aplikacji
+Aplikacja do zarządzania zadaniami projektowymi.
+
+
+
+Dostępne funkcjonalności
+dodanie użytkownika,
+dodanie/usunięcie projektu
+wyświetlanie aktualnych projektów
+przypisanie zadań do projektu,
+przypisanie użytkownika do zadania
+zmiana statusu zadania przez użytkownika (z oczekujące na rozpoczęte / z rozpoczętego na zakończone/zawieszone),
+wyświetlanie listy zadań z określonym statusem dla danego projektu
+
+
+Git
+Link do repozytorium git: https://github.com/jsliwa5/paw-projekt (narazie sam backend, zostanie tam dodana tam również część frontendowa)
+
+
+Docker
+Część backendowa, będzie realizowana przy pomocy dockera (docker-compose) zaówno w wersji developerskiej (docker-compose.dev.yml), jak i produkcyjnej (docker-compose.prod.yml).
+
+Baza danych
+Bazą danych jest PostgreSQL z przynajmniej trzema encjami - project, task, user. 
+Relacje:
+Project-Task (One To Many),
+User-Task (Many To One)
+
+Technologia oparta na JS/TS
+Program jest napisany we frameworku NestJS z wykorzystaniem TypeScript. Do mapowania typów TypeScript jest użyty ORM Prisma.
+
+
+Endpointy
+
+Uwierzytelnianie
+Większość endpointów (poza Auth) jest zabezpieczona.
+Wymagany nagłówek w zapytaniu:
+Authorization: Bearer <TWÓJ_TOKEN_JWT>
+
+1. Moduł Autentykacji (Auth)
+1.1 Rejestracja nowego użytkownika
+Tworzy nowe konto w systemie.
+Metoda: POST
+Endpoint: /auth/register
+Przykładowy Request:
+JSON
+{
+  "email": "jan@example.com",
+  "password": "silneHaslo123",
+  "name": "Jan Kowalski"
+}
+
+Przykładowy Response (201 Created):
+JSON
+{
+  "msg": "User created successfully",
+  "userId": 1
+}
+
+1.2 Logowanie
+Weryfikuje dane i zwraca token JWT potrzebny do dalszej komunikacji.
+Metoda: POST
+Endpoint: /auth/login
+Przykładowy Request:
+JSON
+{
+  "email": "jan@example.com",
+  "password": "silneHaslo123"
+}
+
+Przykładowy Response (200 OK):
+JSON
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+
+1.3 Pobranie profilu (Weryfikacja tokena)
+Zwraca dane zalogowanego użytkownika zakodowane w tokenie.
+Metoda: GET
+Endpoint: /auth/profile
+Wymagany Auth: TAK
+Przykładowy Response (200 OK):
+JSON
+{
+  "sub": 1,
+  "email": "jan@example.com",
+  "iat": 1702650000,
+  "exp": 1702736400
+}
+
+
+2. Moduł Użytkowników (Users)
+2.1 Lista wszystkich użytkowników
+Służy do pobrania listy osób, aby np. przypisać ich do zadania.
+Metoda: GET
+Endpoint: /users
+Wymagany Auth: TAK
+Przykładowy Response (200 OK):
+JSON
+[
+  {
+    "id": 1,
+    "email": "jan@example.com",
+    "name": "Jan Kowalski"
+  },
+  {
+    "id": 2,
+    "email": "anna@example.com",
+    "name": "Anna Nowak"
+  }
+]
+
+
+3. Moduł Projektów (Projects)
+3.1 Utworzenie projektu
+Tworzy nowy projekt i przypisuje twórcę jako właściciela.
+Metoda: POST
+Endpoint: /projects
+Wymagany Auth: TAK
+Przykładowy Request:
+JSON
+{
+  "name": "Aplikacja Mobilna",
+  "description": "Stworzenie MVP na system Android"
+}
+
+Przykładowy Response (201 Created):
+JSON
+{
+  "id": 1,
+  "name": "Aplikacja Mobilna",
+  "description": "Stworzenie MVP na system Android",
+  "ownerId": 1,
+  "createdAt": "2025-12-15T10:00:00.000Z",
+  "updatedAt": "2025-12-15T10:00:00.000Z"
+}
+
+3.2 Pobranie listy projektów
+Zwraca wszystkie dostępne projekty wraz z ich zadaniami.
+Metoda: GET
+Endpoint: /projects
+Wymagany Auth: TAK
+Przykładowy Response (200 OK):
+JSON
+[
+  {
+    "id": 1,
+    "name": "Aplikacja Mobilna",
+    "description": "Stworzenie MVP...",
+    "ownerId": 1,
+    "tasks": [] 
+  }
+]
+
+3.3 Usunięcie projektu
+Usuwa projekt oraz kaskadowo wszystkie przypisane do niego zadania.
+Metoda: DELETE
+Endpoint: /projects/:id (np. /projects/1)
+Wymagany Auth: TAK
+Przykładowy Response (200 OK):
+JSON
+{
+  "id": 1,
+  "name": "Aplikacja Mobilna",
+  ...
+}
+
+
+4. Moduł Zadań (Tasks)
+4.1 Utworzenie zadania
+Dodaje nowe zadanie do konkretnego projektu.
+Metoda: POST
+Endpoint: /tasks
+Wymagany Auth: TAK
+Przykładowy Request:
+JSON
+{
+  "title": "Projekt interfejsu",
+  "description": "Przygotować makiety w Figmie",
+  "projectId": 1,
+  "userId": 2
+}
+
+(Uwaga: Pole userId jest opcjonalne)
+Przykładowy Response (201 Created):
+JSON
+{
+  "id": 5,
+  "title": "Projekt interfejsu",
+  "description": "Przygotować makiety w Figmie",
+  "status": "TODO",
+  "projectId": 1,
+  "userId": 2,
+  "createdAt": "2025-12-15T12:00:00.000Z",
+  "updatedAt": "2025-12-15T12:00:00.000Z"
+}
+
+4.2 Lista zadań (Filtrowanie)
+Pobiera zadania z możliwością filtrowania po ID projektu i statusie.
+Metoda: GET
+Endpoint: /tasks
+Parametry URL (opcjonalne): ?projectId=1&status=TODO
+Wymagany Auth: TAK
+Przykładowy Response (200 OK):
+JSON
+[
+  {
+    "id": 5,
+    "title": "Projekt interfejsu",
+    "status": "TODO",
+    "projectId": 1,
+    "assignedTo": {
+        "id": 2,
+        "name": "Anna Nowak",
+        "email": "anna@example.com"
+    }
+  }
+]
+
+4.3 Przypisanie użytkownika
+Przypisuje konkretną osobę do istniejącego zadania.
+Metoda: PATCH
+Endpoint: /tasks/:id/assign (np. /tasks/5/assign)
+Wymagany Auth: TAK
+Przykładowy Request:
+JSON
+{
+  "userId": 2
+}
+
+4.4 Zmiana statusu zadania
+Aktualizuje status postępu prac.
+Metoda: PATCH
+Endpoint: /tasks/:id/status (np. /tasks/5/status)
+Wymagany Auth: TAK
+Przykładowy Request:
+JSON
+{
+  "status": "IN_PROGRESS"
+}
+
+
+

@@ -4,7 +4,7 @@ import { CreateProjectDto } from './dto/create-project.dto';
 import { AuthGuard } from '../auth/auth.guard';
 
 @UseGuards(AuthGuard) // Wszystkie endpointy wymagają logowania
-@Controller('projects')
+@Controller('api/projects')
 export class ProjectsController {
   constructor(private readonly projectsService: ProjectsService) {}
 

@@ -4,7 +4,7 @@ import { CreateTaskDto } from './dto/create-task.dto';
 import { AuthGuard } from '../auth/auth.guard';
 
 @UseGuards(AuthGuard)
-@Controller('tasks')
+@Controller('api/tasks')
 export class TasksController {
   constructor(private readonly tasksService: TasksService) {}
 

@@ -43,8 +43,9 @@ model Task {
   description String?
   status      String   @default("TODO") 
 
+  priority    Priority @default(MEDIUM) // Domyślnie MEDIUM
+  dueDate     DateTime?
 
-  
   project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
   projectId   Int
 
@@ -53,4 +54,11 @@ model Task {
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
 }
