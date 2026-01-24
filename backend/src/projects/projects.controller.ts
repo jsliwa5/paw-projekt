@@ -2,15 +2,19 @@ import { Controller, Get, Post, Body, Param, Delete, UseGuards, Request } from '
 import { ProjectsService } from './projects.service';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { AuthGuard } from '../auth/auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { Role } from '../auth/enums/role.enum';
 
-@UseGuards(AuthGuard) // Wszystkie endpointy wymagają logowania
+@UseGuards(AuthGuard, RolesGuard)
 @Controller('api/projects')
 export class ProjectsController {
   constructor(private readonly projectsService: ProjectsService) {}
 
   @Post()
+  @Roles(Role.Manager)
   create(@Request() req, @Body() createProjectDto: CreateProjectDto) {
-    // Pobieramy ID usera z tokena JWT (req.user.sub)
+
     return this.projectsService.create(req.user.sub, createProjectDto);
   }
 
@@ -25,6 +29,7 @@ export class ProjectsController {
   }
 
   @Delete(':id')
+  @Roles(Role.Manager)
   remove(@Param('id') id: string) {
     return this.projectsService.remove(+id);
   }
