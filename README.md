@@ -54,7 +54,7 @@ Wymagania wstępne:
 
   -  Git.
 
-  ``` bash 
+  ```bash 
   git clone https://github.com/twoj-login/project-management-app.git
 cd project-management-app
   ```
@@ -67,7 +67,6 @@ cd project-management-app
  
 ```
     docker compose up --build
-    docker compose -f docker-compose.dev.yml --build
 ```
 
    3.  Migracja bazy danych (Przy pierwszym uruchomieniu): Po uruchomieniu kontenerów, otwórz nowy terminal i wykonaj migrację, aby utworzyć tabele w PostgreSQL:
@@ -86,11 +85,17 @@ Uruchamianie lokalne: Po wykonaniu komendy docker-compose up, aplikacja jest dos
 
  - Dokumentacja Swagger: http://localhost:3000/api
 
- # tu daj screeny
+<img width="1919" height="936" alt="obraz" src="https://github.com/user-attachments/assets/2ef34abd-8cae-41d9-a746-25ec6871d67c" />
+<img width="1918" height="938" alt="obraz" src="https://github.com/user-attachments/assets/279a5bb7-b145-48d8-8c1d-2ab62919737a" />
+<img width="1919" height="939" alt="obraz" src="https://github.com/user-attachments/assets/127c41eb-db6a-4f28-90ed-0bc264ab595d" />
+<img width="1916" height="935" alt="obraz" src="https://github.com/user-attachments/assets/163b0fa0-1dc9-42bd-9740-9d1aecd19773" />
+<img width="1919" height="931" alt="obraz" src="https://github.com/user-attachments/assets/856dc531-763b-4cba-8c33-c266fa3c4cd7" />
+<img width="1919" height="938" alt="obraz" src="https://github.com/user-attachments/assets/a994e705-40e2-4220-833a-a57a78a4b6c4" />
+
 
  # Konfiguracja
  Przykładowa zawartośc .env
- ```
+ ```bash
 DATABASE_URL="postgresql://myuser:mypassword@localhost:5432/mydb?schema=public"
 JWT_SECRET="super_tajny_sekret"
  ```
