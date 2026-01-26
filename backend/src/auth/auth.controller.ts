@@ -32,6 +32,7 @@ export class AuthController {
     return this.authService.signUp(
       signUpDto.email,
       signUpDto.password,
+      signUpDto.role,
       signUpDto.name,
     );
   }

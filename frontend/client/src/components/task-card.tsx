@@ -22,6 +22,7 @@ import { StatusBadge } from "./status-badge";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
+import {Restricted} from "@/components/restricted.tsx";
 
 interface TaskCardProps {
   task: Task;
@@ -210,77 +211,80 @@ export function TaskCard({ task }: TaskCardProps) {
               )}
             </div>
           </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                disabled={isUpdating}
-                data-testid={`button-task-menu-${task.id}`}
-              >
-                {isUpdating ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <MoreHorizontal className="h-4 w-4" />
-                )}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuSub>
-                <DropdownMenuSubTrigger>Change Status</DropdownMenuSubTrigger>
-                <DropdownMenuSubContent>
-                  {statusOptions.map((option) => (
-                    <DropdownMenuItem
-                      key={option.value}
-                      onClick={() => updateStatus(option.value)}
-                      disabled={task.status === option.value}
-                      data-testid={`status-option-${option.value.toLowerCase()}`}
-                    >
-                      {option.label}
-                      {task.status === option.value && " (current)"}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuSubContent>
-              </DropdownMenuSub>
-              <DropdownMenuSub>
-                <DropdownMenuSubTrigger>Change Priority</DropdownMenuSubTrigger>
-                <DropdownMenuSubContent>
-                  {priorityOptions.map((option) => (
-                    <DropdownMenuItem
-                      key={option.value}
-                      onClick={() => updatePriority(option.value)}
-                      disabled={task.priority === option.value}
-                      data-testid={`priority-option-${option.value.toLowerCase()}`}
-                    >
-                      {option.label}
-                      {task.priority === option.value && " (current)"}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuSubContent>
-              </DropdownMenuSub>
-              <DropdownMenuSub>
-                <DropdownMenuSubTrigger>Assign User</DropdownMenuSubTrigger>
-                <DropdownMenuSubContent>
-                  {users.length === 0 ? (
-                    <DropdownMenuItem disabled>No users available</DropdownMenuItem>
+          <Restricted to="MANAGER">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    disabled={isUpdating}
+                    data-testid={`button-task-menu-${task.id}`}
+                >
+                  {isUpdating ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
-                    users.map((user) => (
-                      <DropdownMenuItem
-                        key={user.id}
-                        onClick={() => assignUser(user.id)}
-                        data-testid={`assign-user-${user.id}`}
-                      >
-                        {user.name}
-                        {task.userId === user.id && " (assigned)"}
-                      </DropdownMenuItem>
-                    ))
+                      <MoreHorizontal className="h-4 w-4" />
                   )}
-                </DropdownMenuSubContent>
-              </DropdownMenuSub>
-            </DropdownMenuContent>
-          </DropdownMenu>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuSub>
+                  <DropdownMenuSubTrigger>Change Status</DropdownMenuSubTrigger>
+                  <DropdownMenuSubContent>
+                    {statusOptions.map((option) => (
+                        <DropdownMenuItem
+                            key={option.value}
+                            onClick={() => updateStatus(option.value)}
+                            disabled={task.status === option.value}
+                            data-testid={`status-option-${option.value.toLowerCase()}`}
+                        >
+                          {option.label}
+                          {task.status === option.value && " (current)"}
+                        </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuSubContent>
+                </DropdownMenuSub>
+                <DropdownMenuSub>
+                  <DropdownMenuSubTrigger>Change Priority</DropdownMenuSubTrigger>
+                  <DropdownMenuSubContent>
+                    {priorityOptions.map((option) => (
+                        <DropdownMenuItem
+                            key={option.value}
+                            onClick={() => updatePriority(option.value)}
+                            disabled={task.priority === option.value}
+                            data-testid={`priority-option-${option.value.toLowerCase()}`}
+                        >
+                          {option.label}
+                          {task.priority === option.value && " (current)"}
+                        </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuSubContent>
+                </DropdownMenuSub>
+                <DropdownMenuSub>
+                  <DropdownMenuSubTrigger>Assign User</DropdownMenuSubTrigger>
+                  <DropdownMenuSubContent>
+                    {users.length === 0 ? (
+                        <DropdownMenuItem disabled>No users available</DropdownMenuItem>
+                    ) : (
+                        users.map((user) => (
+                            <DropdownMenuItem
+                                key={user.id}
+                                onClick={() => assignUser(user.id)}
+                                data-testid={`assign-user-${user.id}`}
+                            >
+                              {user.name}
+                              {task.userId === user.id && " (assigned)"}
+                            </DropdownMenuItem>
+                        ))
+                    )}
+                  </DropdownMenuSubContent>
+                </DropdownMenuSub>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </Restricted>
+
         </div>
       </CardContent>
     </Card>

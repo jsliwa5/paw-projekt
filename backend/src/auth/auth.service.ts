@@ -2,6 +2,7 @@ import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/co
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import { Role } from './enums/role.enum';
 
 @Injectable()
 export class AuthService {
@@ -11,8 +12,7 @@ export class AuthService {
   ) {}
 
 
-  async signIn(email: string, pass: string): Promise<{ access_token: string }> {
-    // 1. Znajdź usera w bazie
+  async signIn(email: string, pass: string): Promise<{ access_token: string, role: string }> {
     const user = await this.usersService.findOne(email);
     
     if (!user) {
@@ -27,16 +27,17 @@ export class AuthService {
     const payload = {
       sub: user.id,
       email: user.email,
-      role: user.role // <--- DODAJEMY ROLĘ DO TOKENA
+      role: user.role
     };
 
     return {
       access_token: await this.jwtService.signAsync(payload),
+      role: user.role,
     };
   }
 
 
-  async signUp(email: string, pass: string, name?: string) {
+  async signUp(email: string, pass: string, role: Role, name?: string) {
     
     const existingUser = await this.usersService.findOne(email);
     if (existingUser) {
@@ -49,6 +50,7 @@ export class AuthService {
       email,
       password: hashedPassword,
       name,
+      role,
     });
 
 

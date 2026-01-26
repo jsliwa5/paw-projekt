@@ -3,6 +3,7 @@ import { FolderKanban, Loader2 } from "lucide-react";
 import { type Project } from "@shared/schema";
 import { ProjectCard } from "@/components/project-card";
 import { CreateProjectDialog } from "@/components/create-project-dialog";
+import {Restricted} from "@/components/restricted.tsx";
 
 export default function DashboardPage() {
   const { data: projects = [], isLoading } = useQuery<Project[]>({

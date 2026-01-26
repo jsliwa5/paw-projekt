@@ -1,11 +1,13 @@
 import { createContext, useContext, useState, useEffect, useCallback } from "react";
-import type { AuthUser } from "@shared/schema";
+import type { AuthUser, UserRole } from "@shared/schema";
 
 interface AuthContextType {
   token: string | null;
   user: AuthUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  role: UserRole | null;
+  isManager: boolean;
   login: (token: string) => void;
   logout: () => void;
 }
@@ -60,19 +62,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
   }, []);
 
+  const role = user?.role || null;
+  const isManager = role === "MANAGER";
+
   return (
-    <AuthContext.Provider
-      value={{
-        token,
-        user,
-        isAuthenticated: !!token && !!user,
-        isLoading,
-        login,
-        logout,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
+      <AuthContext.Provider
+          value={{
+            token,
+            user,
+            isAuthenticated: !!token && !!user,
+            isLoading,
+            role,        // Eksportujemy rolę
+            isManager,   // Eksportujemy flagę
+            login,
+            logout,
+          }}
+      >
+        {children}
+      </AuthContext.Provider>
   );
 }
 

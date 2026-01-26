@@ -1,4 +1,5 @@
-import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, MinLength, IsEnum } from 'class-validator';
+import { Role } from '../enums/role.enum';
 
 export class SignUpDto {
   @IsEmail({}, { message: 'Niepoprawny format adresu email' })
@@ -11,4 +12,10 @@ export class SignUpDto {
   @IsNotEmpty()
   @IsString()
   name: string;
+
+  @IsNotEmpty()
+  @IsEnum(Role, {
+    message: 'Rola musi być jedną z wartości: USER lub MANAGER'
+  })
+  role: Role;
 }

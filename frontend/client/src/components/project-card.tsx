@@ -19,6 +19,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
+import {Restricted} from "@/components/restricted.tsx";
 
 interface ProjectCardProps {
   project: Project;
@@ -85,21 +86,26 @@ export function ProjectCard({ project, onDelete }: ProjectCardProps) {
             </Link>
           </CardTitle>
         </div>
+        <Restricted to="MANAGER">
         <AlertDialog>
           <AlertDialogTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
-              disabled={isDeleting}
-              data-testid={`button-delete-project-${project.id}`}
-            >
-              {isDeleting ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Trash2 className="h-4 w-4 text-destructive" />
-              )}
-            </Button>
+
+
+              <Button
+                  variant="ghost"
+                  size="icon"
+                  className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                  disabled={isDeleting}
+                  data-testid={`button-delete-project-${project.id}`}
+              >
+                {isDeleting ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                    <Trash2 className="h-4 w-4 text-destructive" />
+                )}
+              </Button>
+
+
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
@@ -124,6 +130,8 @@ export function ProjectCard({ project, onDelete }: ProjectCardProps) {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+        </Restricted>
+
       </CardHeader>
       <CardContent className="space-y-4">
         {project.description && (

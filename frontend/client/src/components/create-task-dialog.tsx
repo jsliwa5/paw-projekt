@@ -38,6 +38,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import {Restricted} from "@/components/restricted.tsx";
 
 interface CreateTaskDialogProps {
   projectId: number;
@@ -105,12 +106,16 @@ export function CreateTaskDialog({ projectId }: CreateTaskDialogProps) {
   }
 
   return (
+      <Restricted to="MANAGER">
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button data-testid="button-new-task">
-          <Plus className="h-4 w-4 mr-2" />
-          New Task
-        </Button>
+
+          <Button data-testid="button-new-task">
+            <Plus className="h-4 w-4 mr-2" />
+            New Task
+          </Button>
+
+
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
@@ -282,5 +287,6 @@ export function CreateTaskDialog({ projectId }: CreateTaskDialogProps) {
         </Form>
       </DialogContent>
     </Dialog>
+      </Restricted>
   );
 }

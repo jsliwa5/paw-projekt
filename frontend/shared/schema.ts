@@ -94,6 +94,9 @@ export const registerSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
   name: z.string().min(2, "Name must be at least 2 characters"),
+  role: z.enum(["USER", "MANAGER"], {
+    required_error: "Wybór roli jest wymagany",
+  }),
 });
 
 export const createProjectSchema = z.object({
@@ -141,9 +144,12 @@ export type UpdateTaskDueDateInput = z.infer<typeof updateTaskDueDateSchema>;
 export type AssignUserInput = z.infer<typeof assignUserSchema>;
 export type UpdatePasswordInput = z.infer<typeof updatePasswordSchema>;
 
+export type UserRole = "MANAGER" | "USER";
+
 export interface AuthUser {
   sub: number;
   email: string;
+  role: UserRole
   iat: number;
   exp: number;
 }
