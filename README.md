@@ -1,136 +1,200 @@
-System Zarządzania Projektami - Środowisko Deweloperskie
+# Wprowadzenie
 
+Aplikacja Project Management System to kompleksowe narzędzie do zarządzania projektami i zadaniami w zespołach, stworzone w architekturze klient-serwer.
 
+Cel aplikacji: Celem systemu jest usprawnienie organizacji pracy poprzez umożliwienie tworzenia projektów, przydzielania zadań konkretnym użytkownikom, śledzenia postępów (statusów), priorytetów oraz terminów realizacji (Due Date).
 
-Dokumentacja techniczna uruchomienia środowiska lokalnego opartego na Dockerze (Monorepo: Backend NestJS + Frontend + PostgreSQL).
+Kluczowe funkcje i możliwości:
 
-1\. Wymagania wstępne
+   - Pełna autentykacja i autoryzacja użytkowników (JWT).
 
+   - Podział na role: Manager (zarządzanie projektami) i User (wykonywanie zadań).
 
+   - Zarządzanie zadaniami: priorytety, terminy, przypisywanie do osób.
 
-Przed rozpoczęciem należy upewnić się, że w systemie zainstalowane są:
+   - Interaktywny frontend z dynamicznym odświeżaniem danych.
 
+   - Automatyczna dokumentacja API (Swagger/OpenAPI).
 
+   # Wykorzystane technologie
 
-&nbsp;   Docker Desktop (włączony i działający w tle).
+Backend:
+- Node.js & NestJS – główny framework serwerowy.
 
+- TypeScript – typowanie statyczne zapewniające bezpieczeństwo kodu.
 
+- Prisma ORM – komunikacja z bazą danych i migracje.
 
-&nbsp;   Git (do pobrania repozytorium).
+- PostgreSQL – relacyjna baza danych.
 
+- Docker & Docker Compose – konteneryzacja środowiska.
 
+- JWT & Passport – obsługa bezpieczeństwa i logowania.
 
-Nie jest wymagana lokalna instalacja Node.js ani PostgreSQL.
+- Swagger – dokumentacja API.
 
-2\. Instrukcja uruchomienia
+Frontend:
+- React (Vite) – biblioteka interfejsu użytkownika.
 
+- TailwindCSS – stylowanie aplikacji.
 
+- shadcn/ui & Radix UI – zestaw komponentów UI.
 
-Całe środowisko jest skonfigurowane w pliku docker-compose.yml. Aby je uruchomić, należy wykonać poniższe kroki w terminalu, w głównym katalogu projektu:
+- TanStack Query – zarządzanie stanem serwera i cache.
 
+- React Hook Form + Zod – obsługa formularzy i walidacja.
 
+# Instalacja i Przygotowanie (Wprowadzenie techniczne)
 
-&nbsp;   Uruchomienie kontenerów: Zbudowanie obrazów i start usług (Frontend, Backend, Baza Danych).
+Wymagania wstępne:
 
-&nbsp;   Bash
+   - Docker Desktop (uruchomiony).
 
+   - Node.js (wersja 18 lub nowsza) - opcjonalnie, jeśli chcesz uruchamiać bez Dockera.
 
+  -  Git.
 
-docker-compose up --build
+  ``` bash 
+  git clone https://github.com/twoj-login/project-management-app.git
+cd project-management-app
+  ```
 
+## Kroki instalacji – przygotowanie projektu:
 
+   1. Konfiguracja środowiska: Upewnij się, że w głównym katalogu (dla docker-compose) oraz w folderach backend i frontend znajdują się odpowiednie pliki konfiguracyjne (Docker zajmie się większością z nich, ale warto sprawdzić .env).
 
-Uwaga: Pierwsze uruchomienie może potrwać kilka minut.
+   2. Uruchomienie za pomocą Dockera (Zalecane): Jest to najszybsza metoda, która stawia bazę danych, backend i frontend jednocześnie.
+ 
+```
+    docker compose up --build
+    docker compose -f docker-compose.dev.yml --build
+```
 
+   3.  Migracja bazy danych (Przy pierwszym uruchomieniu): Po uruchomieniu kontenerów, otwórz nowy terminal i wykonaj migrację, aby utworzyć tabele w PostgreSQL:
+    
+```
+    docker exec -it project-management-app-backend-1 npx prisma migrate dev --name init
+```
+   
+# Instrukcje użytkowania
 
+Uruchamianie lokalne: Po wykonaniu komendy docker-compose up, aplikacja jest dostępna pod następującymi adresami:
 
-Inicjalizacja bazy danych (Migracja): Krok wymagany tylko przy pierwszym uruchomieniu (lub po usunięciu wolumenów), aby utworzyć strukturę tabel w PostgreSQL. Należy otworzyć nowe okno terminala i wykonać:
+  -  Frontend (Aplikacja): http://localhost:5000
 
-Bash
+  -  Backend API: http://localhost:3000
 
+ - Dokumentacja Swagger: http://localhost:3000/api
 
+ # tu daj screeny
 
-&nbsp;   docker exec -it backend-1 npx prisma migrate dev --name init
+ # Konfiguracja
+ Przykładowa zawartośc .env
+ ```
+DATABASE_URL="postgresql://myuser:mypassword@localhost:5432/mydb?schema=public"
+JWT_SECRET="super_tajny_sekret"
+ ```
 
+# Funkcje
+System Rejestracji i Logowania (RBAC):
 
+  -  Bezpieczne hashowanie haseł (bcrypt).
 
-3\. Adresy i Porty
+  -  Role-Based Access Control: Tylko Manager może tworzyć/usuwać projekty.
 
+Zarządzanie Projektami:
 
+  -   Pełny CRUD (Create, Read, Update, Delete) dla projektów.
 
-Po poprawnym uruchomieniu usługi są dostępne pod następującymi adresami:
+Zaawansowane Zadania (Tasks):
 
-Usługa	Adres URL / Host	Port	Opis
+  -  Priorytetyzacja (LOW, MEDIUM, HIGH, URGENT).
 
-Frontend	http://localhost:5173	5173	Aplikacja kliencka (Vite)
+ -   Terminowość (DueDate).
 
-Backend API	http://localhost:3000	3000	NestJS API
+   - Przypisanie do użytkownika (Relacja Task -> User).
 
-Swagger	http://localhost:3000/api	3000	Dokumentacja API (jeśli skonfigurowana)
+Walidacja Danych:
 
-Baza Danych	localhost	5432	PostgreSQL
+  -  Frontend: Zod schema validation (natychmiastowa informacja o błędach).
 
+ -   Backend: DTO + Class Validator (zabezpieczenie API).
+ 
 
+ # Struktura apliakcji
+ ## Model danych (Baza danych)
 
-Dane dostępowe do bazy danych:
+Baza oparta jest o 3 główne tabele zdefiniowane w schema.prisma:
 
+  -  User: Posiada rolę (Enum), listę przypisanych zadań.
 
+  -  Project: Posiada właściciela i listę zadań.
 
-&nbsp;   User: myuser
+  -  Task: Należy do projektu, może być przypisany do Usera, posiada status, priorytet i datę. 
 
+## Struktura katalogów
 
+```
+.
+├── backend/
+│   ├── src/
+│   │   ├── auth/         # Logika logowania, Guardy, Strategie JWT
+│   │   ├── tasks/        # Moduł zadań (Controller, Service, DTO)
+│   │   ├── projects/     # Moduł projektów
+│   │   ├── users/        # Moduł użytkowników
+│   │   ├── prisma/       # Serwis połączenia z bazą
+│   │   └── main.ts       # Punkt startowy aplikacji
+├── frontend/
+│   ├── client/src/
+│   │   ├── components/   # Komponenty UI (współdzielone)
+│   │   ├── lib/          # Konfiguracja API, utilsy
+│   │   └── hooks/        # Customowe hooki (np. useAuth)
+├── docker-compose.yml
+└── README.md
+```
 
-&nbsp;   Password: mypassword
+## Prezentacja funkcojonalności
 
+plik tasks.services.ts
+```typescript
+// 1. Definicja metody serwisu, która przyjmuje DTO (zweryfikowane dane od użytkownika)
+async create(createTaskDto: CreateTaskDto) {
 
+  // 2. Weryfikacja spójności danych: Sprawdzamy czy projekt, do którego
+  // chcemy dodać zadanie, faktycznie istnieje w bazie.
+  const proj = await this.prisma.project.findUnique({
+    where: { id: createTaskDto.projectId },
+  });
 
-&nbsp;   Database: mydb
+  // 3. Jeśli projekt nie istnieje, przerywamy działanie rzucając wyjątek HTTP 404.
+  // NestJS automatycznie zamieni to na odpowiedź JSON z błędem dla klienta.
+  if (!proj) {
+    throw new NotFoundException(`Project with ID ${createTaskDto.projectId} not found`);
+  }
 
+  // 4. Wywołanie Prisma ORM do zapisania rekordu w bazie danych.
+  return this.prisma.task.create({
+    data: {
+      title: createTaskDto.title,
+      description: createTaskDto.description,
+      projectId: createTaskDto.projectId,
+      // Obsługa opcjonalnego przypisania użytkownika
+      userId: createTaskDto.userId || null,
+      status: 'TODO', // Domyślny status
+      priority: createTaskDto.priority, // Enum Priorytetu
+      dueDate: createTaskDto.dueDate,   // Data wykonania
+    },
+    // 5. Select pozwala nam zwrócić czysty obiekt JSON,
+    // ukrywając pola systemowe (np. createdAt, updatedAt)
+    select: this.taskSelect,
+  });
+}
+```
 
+# Wdrożenie
+Tak samo jak kroki instalacji tylko używamy migrate deploy zamiast dev, aby zaaplikować gotowe migracje bez generowania nowych.
 
-4\. Praca z kodem (Development)
 
-
-
-&nbsp;   Backend: Kod znajduje się w katalogu /backend.
-
-
-
-&nbsp;   Frontend: Kod znajduje się w katalogu /frontend.
-
-
-
-Dzięki zamontowanym wolumenom (volumes), każda zmiana w plikach lokalnych powoduje automatyczne przeładowanie aplikacji w kontenerze (Hot Reload).
-
-Komunikacja Frontend -> Backend
-
-
-
-Aplikacja frontendowa powinna wysyłać zapytania API na adres http://localhost:3000 (bezpośrednio do hosta, nie przez nazwę sieciową Dockera).
-
-5\. Przydatne komendy
-
-
-
-Zatrzymanie środowiska:
-
-Bash
-
-
-
-docker-compose down
-
-
-
-Zatrzymanie i usunięcie wszystkich danych (w tym bazy danych):
-
-Bash
-
-
-
-docker-compose down -v
-
-
-
-Rozwiązywanie problemów: W przypadku błędu Port is already in use, należy upewnić się, że żadne inne procesy lokalne nie zajmują portów 3000, 5173 lub 5432.
-
+```bash
+docker exec backend-1 npx prisma migrate deploy
+```

@@ -15,6 +15,14 @@ export class TasksService {
     dueDate: true,
     projectId: true,
     userId: true,
+
+    assignedTo: {
+      select: {
+        id: true,
+        name: true,
+        email: true,
+      },
+    },
   };
 
   async create(createTaskDto: CreateTaskDto) {
