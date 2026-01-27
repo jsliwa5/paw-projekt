@@ -55,8 +55,8 @@ Wymagania wstępne:
   -  Git.
 
   ```bash 
-  git clone https://github.com/twoj-login/project-management-app.git
-cd project-management-app
+  git clone https://github.com/jsliwa5/paw-projekt.git
+cd paw-projekt
   ```
 
 ## Kroki instalacji – przygotowanie projektu:
@@ -201,5 +201,5 @@ Tak samo jak kroki instalacji tylko używamy migrate deploy zamiast dev, aby zaa
 
 
 ```bash
-docker exec backend-1 npx prisma migrate deploy
+docker exec project-management-app-backend-1 npx prisma migrate deploy
 ```
